@@ -13,6 +13,7 @@ PRODUCT_PACKAGES := \
     Launcher \
     Mms \
     Music \
+    PackageInstaller \
     Settings \
     Sync \
     Updater \
