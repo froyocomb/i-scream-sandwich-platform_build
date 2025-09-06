@@ -10,6 +10,8 @@ PRODUCT_PACKAGES := \
     DrmProvider \
     LatinIME \
     Launcher \
+    Calculator \
+    PackageInstaller \
     Mms \
     Music \
     Settings \
