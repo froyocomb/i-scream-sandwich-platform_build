@@ -5,12 +5,15 @@
 PRODUCT_PACKAGES := \
     AlarmClock \
     AlarmProvider \
+    Calculator \
     Calendar \
     Camera \
     DrmProvider \
     LatinIME \
+    Launcher \
     Mms \
     Music \
+    PackageInstaller \
     Settings \
     Sync \
     Updater \
