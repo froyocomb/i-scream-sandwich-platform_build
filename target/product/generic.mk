@@ -5,6 +5,7 @@
 PRODUCT_PACKAGES := \
     AlarmClock \
     AlarmProvider \
+    Calculator \
     Calendar \
     Camera \
     DrmProvider \
