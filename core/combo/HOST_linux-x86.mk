@@ -46,8 +46,7 @@ $(combo_2nd_arch_prefix)HOST_GLOBAL_CFLAGS += -fPIC \
   -no-canonical-prefixes \
   -include $(call select-android-config-h,linux-x86)
 
-# MODIFICATION: Force C++11 and Clang-style atomics support to fix _c11_atomic and char16_t
-$(combo_2nd_arch_prefix)HOST_GLOBAL_CPPFLAGS += -std=c++11 -D__clang__
+$(combo_2nd_arch_prefix)HOST_GLOBAL_CFLAGS += -Datomic_int_least32_t=int32_t -D_GNU_SOURCE
 
 # Disable new longjmp in glibc 2.11 and later.
 # See bug 2967937.
