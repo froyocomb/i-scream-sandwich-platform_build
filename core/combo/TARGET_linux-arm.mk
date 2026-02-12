@@ -97,6 +97,7 @@ $(combo_2nd_arch_prefix)TARGET_GLOBAL_CPPFLAGS += -std=c++11
 # GCC-specific flags that Clang 3.6 doesn't like are removed or wrapped
 ifneq ($(filter 4.6 4.6.% 4.7 4.7.% 4.8, $($(combo_2nd_arch_prefix)TARGET_GCC_VERSION)),)
 $(combo_2nd_arch_prefix)TARGET_GLOBAL_CFLAGS += -fno-builtin-sin
+# Removed -fno-strict-volatile-bitfields as it is not supported by Clang 3.6
 endif
 
 $(combo_2nd_arch_prefix)TARGET_GLOBAL_CFLAGS += -Wno-psabi
@@ -109,6 +110,8 @@ $(combo_2nd_arch_prefix)TARGET_GLOBAL_LDFLAGS += \
 			-Wl,--fatal-warnings \
 			-Wl,--icf=safe \
 			$(arch_variant_ldflags)
+
+# Removed -mthumb-interwork as it is not supported by Clang 3.6
 
 $(combo_2nd_arch_prefix)TARGET_GLOBAL_CPPFLAGS += -fvisibility-inlines-hidden
 
