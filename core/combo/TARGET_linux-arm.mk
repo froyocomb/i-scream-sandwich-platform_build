@@ -76,7 +76,6 @@ ifeq ($(FORCE_ARM_DEBUGGING),true)
 endif
 
 android_config_h := $(call select-android-config-h,linux-arm)
-
 $(combo_2nd_arch_prefix)TARGET_GLOBAL_CFLAGS += \
 			-msoft-float \
 			-ffunction-sections \
@@ -88,13 +87,34 @@ $(combo_2nd_arch_prefix)TARGET_GLOBAL_CFLAGS += \
 			-D_FORTIFY_SOURCE=2 \
 			-fno-short-enums \
 			-no-canonical-prefixes \
-			-fno-canonical-system-headers \
+# REMOVED: -fno-canonical-system-headers (Unsupported by Clang 3.6)
 			$(arch_variant_cflags) \
 			-include $(android_config_h) \
 			-I $(dir $(android_config_h))
 
 # Ensure C++11 is enabled to fix char16_t errors
 $(combo_2nd_arch_prefix)TARGET_GLOBAL_CPPFLAGS += -std=c++11
+
+# Only apply GCC-specific flags if we are NOT using Clang
+ifeq ($(strip $(PRIVATE_CLANG)),)
+ifneq ($(filter 4.6 4.6.% 4.7 4.7.% 4.8, $($(combo_2nd_arch_prefix)TARGET_GCC_VERSION)),)
+$(combo_2nd_arch_prefix)TARGET_GLOBAL_CFLAGS += -fno-builtin-sin \
+			-fno-strict-volatile-bitfields
+endif
+endif
+
+$(combo_2nd_arch_prefix)TARGET_GLOBAL_CFLAGS += -Wno-psabi
+
+$(combo_2nd_arch_prefix)TARGET_GLOBAL_LDFLAGS += \
+			-Wl,-z,noexecstack \
+			-Wl,-z,relro \
+			-Wl,-z,now \
+			-Wl,--warn-shared-textrel \
+			-Wl,--fatal-warnings \
+			-Wl,--icf=safe \
+			$(arch_variant_ldflags)
+
+$(combo_2nd_arch_prefix)TARGET_GLOBAL_CPPFLAGS += -fvisibility-inlines-hidden
 
 ifneq ($(filter 4.6 4.6.% 4.7 4.7.% 4.8, $($(combo_2nd_arch_prefix)TARGET_GCC_VERSION)),)
 $(combo_2nd_arch_prefix)TARGET_GLOBAL_CFLAGS += -fno-builtin-sin \
