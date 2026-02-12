@@ -17,9 +17,14 @@
 # Configuration for builds hosted on linux-x86.
 # Included by combo/select.mk
 
-ifeq ($(strip $($(combo_2nd_arch_prefix)HOST_TOOLCHAIN_PREFIX)),)
-$(combo_2nd_arch_prefix)HOST_TOOLCHAIN_PREFIX := prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.11-4.6/bin/x86_64-linux-
-endif
+$(combo_2nd_arch_prefix)HOST_CC  := gcc
+$(combo_2nd_arch_prefix)HOST_CXX := g++
+$(combo_2nd_arch_prefix)HOST_AR  := ar
+$(combo_2nd_arch_prefix)HOST_GLOBAL_CPPFLAGS += -std=c++11
+
+# ifeq ($(strip $($(combo_2nd_arch_prefix)HOST_TOOLCHAIN_PREFIX)),)
+# $(combo_2nd_arch_prefix)HOST_TOOLCHAIN_PREFIX := prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.11-4.6/bin/x86_64-linux-
+# endif
 # Don't do anything if the toolchain is not there
 ifneq (,$(strip $(wildcard $($(combo_2nd_arch_prefix)HOST_TOOLCHAIN_PREFIX)gcc)))
 $(combo_2nd_arch_prefix)HOST_CC  := $($(combo_2nd_arch_prefix)HOST_TOOLCHAIN_PREFIX)gcc
