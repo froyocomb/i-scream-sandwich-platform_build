@@ -17,33 +17,21 @@
 # Configuration for builds hosted on linux-x86.
 # Included by combo/select.mk
 
-# ifeq ($(strip $($(combo_2nd_arch_prefix)HOST_TOOLCHAIN_PREFIX)),)
-# $(combo_2nd_arch_prefix)HOST_TOOLCHAIN_PREFIX := prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.11-4.6/bin/x86_64-linux-
-# endif
+# Use Clang 3.6
+ifeq ($(HOST_OS),linux)
+$(combo_2nd_arch_prefix)HOST_CC  := prebuilts/clang/linux-x86/host/3.6/bin/clang
+$(combo_2nd_arch_prefix)HOST_CXX := prebuilts/clang/linux-x86/host/3.6/bin/clang++
+$(combo_2nd_arch_prefix)HOST_AR  := prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.11-4.6/bin/x86_64-linux-ar
+endif
 
-define get-file-size
-stat --format "%s" "$(1)" | tr -d '\n'
-endef
-
-$(combo_2nd_arch_prefix)HOST_CC  := gcc
-$(combo_2nd_arch_prefix)HOST_CXX := g++
-$(combo_2nd_arch_prefix)HOST_AR  := ar
-
-$(combo_2nd_arch_prefix)HOST_GLOBAL_CFLAGS += -D"__has_feature(x)=0" -D"__has_extension(x)=0"
-$(combo_2nd_arch_prefix)HOST_GLOBAL_CFLAGS += -Wno-multichar
-
-$(combo_2nd_arch_prefix)HOST_GLOBAL_CPPFLAGS += -std=gnu++11
-
-$(combo_2nd_arch_prefix)HOST_GLOBAL_CFLAGS += \
-    -D__STDC_UTF_16__ \
-    -D__STDC_UTF_32__ \
-    -Datomic_bool=bool \
-    -Datomic_int_least32_t=int32_t \
-    -D_GNU_SOURCE
+# Original fallback logic kept for reference, but overridden above
+ifeq ($(strip $($(combo_2nd_arch_prefix)HOST_TOOLCHAIN_PREFIX)),)
+$(combo_2nd_arch_prefix)HOST_TOOLCHAIN_PREFIX := prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.11-4.6/bin/x86_64-linux-
+endif
 
 # gcc location for clang;
-# MODIFICATION: Pointing this to the system instead of the legacy 4.6 prebuilt
-$(combo_2nd_arch_prefix)HOST_TOOLCHAIN_FOR_CLANG := /usr/
+# to be updated when clang is updated
+$(combo_2nd_arch_prefix)HOST_TOOLCHAIN_FOR_CLANG := prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.11-4.6/
 
 # We expect SSE3 floating point math.
 $(combo_2nd_arch_prefix)HOST_GLOBAL_CFLAGS += -mstackrealign -msse3 -mfpmath=sse -m32 -Wa,--noexecstack -march=prescott
@@ -58,7 +46,8 @@ $(combo_2nd_arch_prefix)HOST_GLOBAL_CFLAGS += -fPIC \
   -no-canonical-prefixes \
   -include $(call select-android-config-h,linux-x86)
 
-$(combo_2nd_arch_prefix)HOST_GLOBAL_CFLAGS += -Datomic_int_least32_t=int32_t -D_GNU_SOURCE
+# Force inclusion of stdint before any other headers to fix 'uintptr_t' errors
+$(combo_2nd_arch_prefix)HOST_GLOBAL_CFLAGS += -include stdint.h
 
 # Disable new longjmp in glibc 2.11 and later.
 # See bug 2967937.
@@ -73,3 +62,7 @@ $(combo_2nd_arch_prefix)HOST_NO_UNDEFINED_LDFLAGS := -Wl,--no-undefined
 
 ############################################################
 ## Macros after this line are shared by the 64-bit config.
+# $(1): The file to check
+define get-file-size
+stat --format "%s" "$(1)" | tr -d '\n'
+endef
