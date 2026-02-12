@@ -46,7 +46,7 @@ $(combo_2nd_arch_prefix)TARGET_TOOLCHAIN_ROOT := prebuilts/gcc/$(HOST_PREBUILT_T
 $(combo_2nd_arch_prefix)TARGET_TOOLS_PREFIX := $($(combo_2nd_arch_prefix)TARGET_TOOLCHAIN_ROOT)/bin/arm-linux-androideabi-
 endif
 
-# Forced Clang for target to fix __has_feature and glibc header collisions
+# FORCE CLANG 3.6 for Target
 $(combo_2nd_arch_prefix)TARGET_CC := prebuilts/clang/linux-x86/host/3.6/bin/clang
 $(combo_2nd_arch_prefix)TARGET_CXX := prebuilts/clang/linux-x86/host/3.6/bin/clang++
 $(combo_2nd_arch_prefix)TARGET_AR := $($(combo_2nd_arch_prefix)TARGET_TOOLS_PREFIX)ar$(HOST_EXECUTABLE_SUFFIX)
@@ -69,13 +69,13 @@ $(combo_2nd_arch_prefix)TARGET_thumb_CFLAGS :=  -mthumb \
                         -fno-strict-aliasing
 
 # Set FORCE_ARM_DEBUGGING to "true" in your buildspec.mk
-# or in your environment to force a full arm build
 ifeq ($(FORCE_ARM_DEBUGGING),true)
   $(combo_2nd_arch_prefix)TARGET_arm_CFLAGS += -fno-omit-frame-pointer -fno-strict-aliasing
   $(combo_2nd_arch_prefix)TARGET_thumb_CFLAGS += -marm -fno-omit-frame-pointer
 endif
 
 android_config_h := $(call select-android-config-h,linux-arm)
+
 $(combo_2nd_arch_prefix)TARGET_GLOBAL_CFLAGS += \
 			-msoft-float \
 			-ffunction-sections \
@@ -91,15 +91,12 @@ $(combo_2nd_arch_prefix)TARGET_GLOBAL_CFLAGS += \
 			-include $(android_config_h) \
 			-I $(dir $(android_config_h))
 
-# Ensure C++11 is enabled to fix char16_t errors
+# Ensure C++11 is enabled
 $(combo_2nd_arch_prefix)TARGET_GLOBAL_CPPFLAGS += -std=c++11
 
-# Only apply GCC-specific flags if we are NOT using Clang
-ifeq ($(strip $(PRIVATE_CLANG)),)
+# GCC-specific flags that Clang 3.6 doesn't like are removed or wrapped
 ifneq ($(filter 4.6 4.6.% 4.7 4.7.% 4.8, $($(combo_2nd_arch_prefix)TARGET_GCC_VERSION)),)
-$(combo_2nd_arch_prefix)TARGET_GLOBAL_CFLAGS += -fno-builtin-sin \
-			-fno-strict-volatile-bitfields
-endif
+$(combo_2nd_arch_prefix)TARGET_GLOBAL_CFLAGS += -fno-builtin-sin
 endif
 
 $(combo_2nd_arch_prefix)TARGET_GLOBAL_CFLAGS += -Wno-psabi
@@ -112,26 +109,6 @@ $(combo_2nd_arch_prefix)TARGET_GLOBAL_LDFLAGS += \
 			-Wl,--fatal-warnings \
 			-Wl,--icf=safe \
 			$(arch_variant_ldflags)
-
-$(combo_2nd_arch_prefix)TARGET_GLOBAL_CPPFLAGS += -fvisibility-inlines-hidden
-
-ifneq ($(filter 4.6 4.6.% 4.7 4.7.% 4.8, $($(combo_2nd_arch_prefix)TARGET_GCC_VERSION)),)
-$(combo_2nd_arch_prefix)TARGET_GLOBAL_CFLAGS += -fno-builtin-sin \
-			-fno-strict-volatile-bitfields
-endif
-
-$(combo_2nd_arch_prefix)TARGET_GLOBAL_CFLAGS += -Wno-psabi
-
-$(combo_2nd_arch_prefix)TARGET_GLOBAL_LDFLAGS += \
-			-Wl,-z,noexecstack \
-			-Wl,-z,relro \
-			-Wl,-z,now \
-			-Wl,--warn-shared-textrel \
-			-Wl,--fatal-warnings \
-			-Wl,--icf=safe \
-			$(arch_variant_ldflags)
-
-$(combo_2nd_arch_prefix)TARGET_GLOBAL_CFLAGS += -mthumb-interwork
 
 $(combo_2nd_arch_prefix)TARGET_GLOBAL_CPPFLAGS += -fvisibility-inlines-hidden
 
@@ -148,7 +125,12 @@ libc_root := bionic/libc
 libm_root := bionic/libm
 libstdc++_root := bionic/libstdc++
 
+
+## on some hosts, the target cross-compiler is not available so do not run this command
 ifneq ($(wildcard $($(combo_2nd_arch_prefix)TARGET_CC)),)
+# We compile with the global cflags to ensure that
+# any flags which affect libgcc are correctly taken
+# into account.
 $(combo_2nd_arch_prefix)TARGET_LIBGCC := $(shell $($(combo_2nd_arch_prefix)TARGET_CC) \
         $($(combo_2nd_arch_prefix)TARGET_GLOBAL_CFLAGS) -print-libgcc-file-name)
 $(combo_2nd_arch_prefix)TARGET_LIBATOMIC := $(shell $($(combo_2nd_arch_prefix)TARGET_CC) \
@@ -227,7 +209,7 @@ $(hide) $(PRIVATE_CXX) -nostdlib -Bdynamic -pie \
 	$(PRIVATE_LDFLAGS) \
 	$(PRIVATE_TARGET_LIBATOMIC) \
 	$(if $(PRIVATE_LIBCXX),,$(PRIVATE_TARGET_LIBGCC)) \
-	$(if $(filter true,$(PRIVATE_no_CRT)),,$(PRIVATE_TARGET_CRTEND_O)) \
+	$(if $(filter true,$(PRIVATE_NO_CRT)),,$(PRIVATE_TARGET_CRTEND_O)) \
 	$(PRIVATE_LDLIBS)
 endef
 
