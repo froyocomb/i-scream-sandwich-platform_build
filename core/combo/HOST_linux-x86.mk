@@ -21,6 +21,10 @@
 # $(combo_2nd_arch_prefix)HOST_TOOLCHAIN_PREFIX := prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.11-4.6/bin/x86_64-linux-
 # endif
 
+define get-file-size
+stat --format "%s" "$(1)" | tr -d '\n'
+endef
+
 $(combo_2nd_arch_prefix)HOST_CC  := gcc
 $(combo_2nd_arch_prefix)HOST_CXX := g++
 $(combo_2nd_arch_prefix)HOST_AR  := ar
