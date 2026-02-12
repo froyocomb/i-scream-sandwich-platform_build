@@ -29,6 +29,15 @@ $(combo_2nd_arch_prefix)HOST_CC  := gcc
 $(combo_2nd_arch_prefix)HOST_CXX := g++
 $(combo_2nd_arch_prefix)HOST_AR  := ar
 
+$(combo_2nd_arch_prefix)HOST_GLOBAL_CPPFLAGS += -std=gnu++11
+
+$(combo_2nd_arch_prefix)HOST_GLOBAL_CFLAGS += \
+    -D__STDC_UTF_16__ \
+    -D__STDC_UTF_32__ \
+    -Datomic_bool=bool \
+    -Datomic_int_least32_t=int32_t \
+    -D_GNU_SOURCE
+
 # gcc location for clang;
 # MODIFICATION: Pointing this to the system instead of the legacy 4.6 prebuilt
 $(combo_2nd_arch_prefix)HOST_TOOLCHAIN_FOR_CLANG := /usr/
