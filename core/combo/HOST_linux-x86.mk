@@ -17,23 +17,17 @@
 # Configuration for builds hosted on linux-x86.
 # Included by combo/select.mk
 
-$(combo_2nd_arch_prefix)HOST_CC  := gcc
-$(combo_2nd_arch_prefix)HOST_CXX := g++
-$(combo_2nd_arch_prefix)HOST_AR  := ar
-$(combo_2nd_arch_prefix)HOST_GLOBAL_CPPFLAGS += -std=c++11
-
 # ifeq ($(strip $($(combo_2nd_arch_prefix)HOST_TOOLCHAIN_PREFIX)),)
 # $(combo_2nd_arch_prefix)HOST_TOOLCHAIN_PREFIX := prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.11-4.6/bin/x86_64-linux-
 # endif
-# Don't do anything if the toolchain is not there
-ifneq (,$(strip $(wildcard $($(combo_2nd_arch_prefix)HOST_TOOLCHAIN_PREFIX)gcc)))
-$(combo_2nd_arch_prefix)HOST_CC  := $($(combo_2nd_arch_prefix)HOST_TOOLCHAIN_PREFIX)gcc
-$(combo_2nd_arch_prefix)HOST_CXX := $($(combo_2nd_arch_prefix)HOST_TOOLCHAIN_PREFIX)g++
-$(combo_2nd_arch_prefix)HOST_AR  := $($(combo_2nd_arch_prefix)HOST_TOOLCHAIN_PREFIX)ar
-endif # $($(combo_2nd_arch_prefix)HOST_TOOLCHAIN_PREFIX)gcc exists
 
-# gcc location for clang; to be updated when clang is updated
-$(combo_2nd_arch_prefix)HOST_TOOLCHAIN_FOR_CLANG := prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.11-4.6/
+$(combo_2nd_arch_prefix)HOST_CC  := gcc
+$(combo_2nd_arch_prefix)HOST_CXX := g++
+$(combo_2nd_arch_prefix)HOST_AR  := ar
+
+# gcc location for clang;
+# MODIFICATION: Pointing this to the system instead of the legacy 4.6 prebuilt
+$(combo_2nd_arch_prefix)HOST_TOOLCHAIN_FOR_CLANG := /usr/
 
 # We expect SSE3 floating point math.
 $(combo_2nd_arch_prefix)HOST_GLOBAL_CFLAGS += -mstackrealign -msse3 -mfpmath=sse -m32 -Wa,--noexecstack -march=prescott
@@ -48,7 +42,11 @@ $(combo_2nd_arch_prefix)HOST_GLOBAL_CFLAGS += -fPIC \
   -no-canonical-prefixes \
   -include $(call select-android-config-h,linux-x86)
 
-# Disable new longjmp in glibc 2.11 and later. See bug 2967937.
+# MODIFICATION: Force C++11 and Clang-style atomics support to fix _c11_atomic and char16_t
+$(combo_2nd_arch_prefix)HOST_GLOBAL_CPPFLAGS += -std=c++11 -D__clang__
+
+# Disable new longjmp in glibc 2.11 and later.
+# See bug 2967937.
 $(combo_2nd_arch_prefix)HOST_GLOBAL_CFLAGS += -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0
 
 # Workaround differences in inttypes.h between host and target.
@@ -61,7 +59,4 @@ $(combo_2nd_arch_prefix)HOST_NO_UNDEFINED_LDFLAGS := -Wl,--no-undefined
 ############################################################
 ## Macros after this line are shared by the 64-bit config.
 
-# $(1): The file to check
-define get-file-size
-stat --format "%s" "$(1)" | tr -d '\n'
 endef
