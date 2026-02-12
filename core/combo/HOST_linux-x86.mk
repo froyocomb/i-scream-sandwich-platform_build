@@ -29,6 +29,9 @@ $(combo_2nd_arch_prefix)HOST_CC  := gcc
 $(combo_2nd_arch_prefix)HOST_CXX := g++
 $(combo_2nd_arch_prefix)HOST_AR  := ar
 
+$(combo_2nd_arch_prefix)HOST_GLOBAL_CFLAGS += -D"__has_feature(x)=0" -D"__has_extension(x)=0"
+$(combo_2nd_arch_prefix)HOST_GLOBAL_CFLAGS += -Wno-multichar
+
 $(combo_2nd_arch_prefix)HOST_GLOBAL_CPPFLAGS += -std=gnu++11
 
 $(combo_2nd_arch_prefix)HOST_GLOBAL_CFLAGS += \
